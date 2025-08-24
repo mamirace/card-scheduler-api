@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 
-from card_scheduler_tr import schedule_cards, CardInput
+from card_scheduler import schedule_cards, CardInput
 
 app = FastAPI(title="Card Scheduler API", version="1.0.0-tr")
 
