@@ -4,9 +4,9 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 
-from card_scheduler import schedule_cards, CardInput
+from card_scheduler_tr import schedule_cards, CardInput
 
-app = FastAPI(title="Card Scheduler API", version="1.0.0")
+app = FastAPI(title="Card Scheduler API", version="1.0.0-tr")
 
 # CORS ayarı (her yerden istek gelsin diye)
 app.add_middleware(
@@ -23,13 +23,11 @@ class CardIn(BaseModel):
     statement_closing_day: Optional[int] = None
     payment_due_day: Optional[int] = None
     grace_period: Optional[int] = None
-    country: Optional[str] = None
 
 class ScheduleRequest(BaseModel):
     cards: List[CardIn]
     system_dt: Optional[datetime] = None
     language: str = "tr"
-    device_tz: Optional[str] = None
 
 @app.get("/health")
 def health():
@@ -46,7 +44,6 @@ def schedule(req: ScheduleRequest):
             statement_closing_day=c.statement_closing_day,
             payment_due_day=c.payment_due_day,
             grace_period=c.grace_period,
-            country=c.country,
         )
         for c in req.cards
     ]
@@ -59,9 +56,7 @@ def schedule(req: ScheduleRequest):
         rows = schedule_cards(
             card_list,
             system_dt=system_dt,
-            holidays_csv=None,
             language=req.language,
-            device_tz=req.device_tz,
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Hesaplama hatası: {str(e)}")
