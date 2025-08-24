@@ -358,7 +358,7 @@ def schedule_cards(cards: List[CardInput],
             comp = _compute_closing_payment_for_month(y, m, card, holidays)
         return comp.closing
 
-    
+    current_row_number = 1
     def add_row(
         picks: List[CardComputed],
         begin: date,
@@ -399,7 +399,7 @@ def schedule_cards(cards: List[CardInput],
                 }
                 rows.append(row)
 
-
+        current_row_number += 1  # tüm grup bitince sadece bir kez artır
 
 
     add_row(first_row_cards, begin, end, is_first=True, number_override=1)
