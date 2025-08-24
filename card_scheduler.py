@@ -234,13 +234,13 @@ def _all_current_pairs(today: date, cards: List[CardInput], holidays: Dict[str, 
 
 
 def _pick_first_row(pairs: List[CardComputed]) -> List[CardComputed]:
-    # Choose card(s) with latest payment date; tie-breaker: closest closing
+    # Choose card(s) with latest payment date
     if not pairs:
         return []
     max_pay = max(p.payment for p in pairs)
     candidates = [p for p in pairs if p.payment == max_pay]
-    if len(candidates) == 1:
-        return candidates
+    return candidates  # hepsi birlikte dönüyor
+
     # tie: pick those with minimum closing distance from "now" (they all share same payment)
     min_closing = min(p.closing for p in candidates)
     tied = [p for p in candidates if p.closing == min_closing]
