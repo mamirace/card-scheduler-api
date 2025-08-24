@@ -358,9 +358,7 @@ def schedule_cards(cards: List[CardInput],
             comp = _compute_closing_payment_for_month(y, m, card, holidays)
         return comp.closing
 
-    # Rows builder
-        # Rows builder
-        # Rows builder
+    
     def add_row(
         picks: List[CardComputed],
         begin: date,
@@ -368,26 +366,38 @@ def schedule_cards(cards: List[CardInput],
         is_first: bool,
         number_override: Optional[int] = None,
     ):
-        # Eğer ilk sıra ise tüm kartları tek satıra yaz
+        # Eğer ilk sıra ise picks'teki tüm kartları ayrı ayrı yazacağız ama numarası aynı olacak
         if is_first:
-            groups = [picks]
+            row_number = number_override if number_override is not None else (len(rows) + 1)
+            for idx, p in enumerate(picks):
+                after = next_own_closing_after(p, end + timedelta(days=1))
+                closing_for_use = after.closing
+                payment_for_use = after.payment
+                row = {
+                    "Raw Number": row_number if idx == 0 else "",  # sadece ilkine 1 yaz, diğerlerine boş bırak
+                    "Card Name": p.card.card_name,
+                    "Closing Waited": "" if is_first else _fmt(prev_own_closing_before(p, begin), language),
+                    "Use Date (Begin-End)": f"{_fmt(begin, language)} – {_fmt(end, language)}",
+                    "Closing for Use": _fmt(closing_for_use, language),
+                    "Payment for Use": _fmt(payment_for_use, language),
+                }
+                rows.append(row)
         else:
             groups = _group_by_use_date(picks)
-
-        for group in groups:
-            after = next_own_closing_after(group[0], end + timedelta(days=1))
-            closing_for_use = after.closing
-            payment_for_use = after.payment
-            row_number = number_override if number_override is not None else (len(rows) + 1)
-            row = {
-                "Raw Number": row_number,
-                "Card Name": ", ".join([p.card.card_name for p in group]),
-                "Closing Waited": "" if is_first else _fmt(prev_own_closing_before(group[0], begin), language),
-                "Use Date (Begin-End)": f"{_fmt(begin, language)} – {_fmt(end, language)}",
-                "Closing for Use": _fmt(closing_for_use, language),
-                "Payment for Use": _fmt(payment_for_use, language),
-            }
-            rows.append(row)
+            for group in groups:
+                after = next_own_closing_after(group[0], end + timedelta(days=1))
+                closing_for_use = after.closing
+                payment_for_use = after.payment
+                row_number = number_override if number_override is not None else (len(rows) + 1)
+                row = {
+                    "Raw Number": row_number,
+                    "Card Name": ", ".join([p.card.card_name for p in group]),
+                    "Closing Waited": "" if is_first else _fmt(prev_own_closing_before(group[0], begin), language),
+                    "Use Date (Begin-End)": f"{_fmt(begin, language)} – {_fmt(end, language)}",
+                    "Closing for Use": _fmt(closing_for_use, language),
+                    "Payment for Use": _fmt(payment_for_use, language),
+                }
+                rows.append(row)
 
 
 
