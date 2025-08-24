@@ -254,6 +254,19 @@ def _nearest_other_closing_after(pairs: List[CardComputed], excluding_cards: Lis
         return None
     return min(others)
 
+def _group_by_use_date(pairs: List[CardComputed]) -> List[List[CardComputed]]:
+    grouped = []
+    for p in pairs:
+        added = False
+        for group in grouped:
+            if group[0].closing == p.closing and group[0].payment == p.payment:
+                group.append(p)
+                added = True
+                break
+        if not added:
+            grouped.append([p])
+    return grouped
+
 
 def schedule_cards(cards: List[CardInput],
                    system_dt: Optional[datetime] = None,
@@ -341,15 +354,15 @@ def schedule_cards(cards: List[CardInput],
 
     # Rows builder
     def add_row(picks: List[CardComputed], begin: date, end: date, is_first: bool):
-        # next own closing/payment after end for the first card (shared when multiple cards tie in a row)
-        for p in picks:
-            after = next_own_closing_after(p, end + timedelta(days=1))
+        grouped_picks = _group_by_use_date(picks)
+        for group in grouped_picks:
+            after = next_own_closing_after(group[0], end + timedelta(days=1))
             closing_for_use = after.closing
             payment_for_use = after.payment
             row = {
                 "Raw Number": len(rows) + 1,
-                "Card Name": p.card.card_name,
-                "Closing Waited": "" if is_first else _fmt(prev_own_closing_before(p, begin), language),
+                "Card Name": ", ".join([p.card.card_name for p in group]),
+                "Closing Waited": "" if is_first else _fmt(prev_own_closing_before(group[0], begin), language),
                 "Use Date (Begin-End)": f"{_fmt(begin, language)} – {_fmt(end, language)}",
                 "Closing for Use": _fmt(closing_for_use, language),
                 "Payment for Use": _fmt(payment_for_use, language),
