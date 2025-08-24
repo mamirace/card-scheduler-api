@@ -360,27 +360,35 @@ def schedule_cards(cards: List[CardInput],
 
     # Rows builder
         # Rows builder
-    def add_row(picks: List[CardComputed], begin: date, end: date, is_first: bool, number_override: Optional[int] = None):
-    # Eğer ilk sıra ise tüm kartları tek satıra yaz
-    if is_first:
-        groups = [picks]
-    else:
-        groups = _group_by_use_date(picks)
+        # Rows builder
+    def add_row(
+        picks: List[CardComputed],
+        begin: date,
+        end: date,
+        is_first: bool,
+        number_override: Optional[int] = None,
+    ):
+        # Eğer ilk sıra ise tüm kartları tek satıra yaz
+        if is_first:
+            groups = [picks]
+        else:
+            groups = _group_by_use_date(picks)
 
-    for group in groups:
-        after = next_own_closing_after(group[0], end + timedelta(days=1))
-        closing_for_use = after.closing
-        payment_for_use = after.payment
-        row_number = number_override if number_override is not None else (len(rows) + 1)
-        row = {
-            "Raw Number": row_number,
-            "Card Name": ", ".join([p.card.card_name for p in group]),
-            "Closing Waited": "" if is_first else _fmt(prev_own_closing_before(group[0], begin), language),
-            "Use Date (Begin-End)": f"{_fmt(begin, language)} – {_fmt(end, language)}",
-            "Closing for Use": _fmt(closing_for_use, language),
-            "Payment for Use": _fmt(payment_for_use, language),
-        }
-        rows.append(row)
+        for group in groups:
+            after = next_own_closing_after(group[0], end + timedelta(days=1))
+            closing_for_use = after.closing
+            payment_for_use = after.payment
+            row_number = number_override if number_override is not None else (len(rows) + 1)
+            row = {
+                "Raw Number": row_number,
+                "Card Name": ", ".join([p.card.card_name for p in group]),
+                "Closing Waited": "" if is_first else _fmt(prev_own_closing_before(group[0], begin), language),
+                "Use Date (Begin-End)": f"{_fmt(begin, language)} – {_fmt(end, language)}",
+                "Closing for Use": _fmt(closing_for_use, language),
+                "Payment for Use": _fmt(payment_for_use, language),
+            }
+            rows.append(row)
+
 
 
 
