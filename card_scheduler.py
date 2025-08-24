@@ -281,27 +281,33 @@ def schedule_cards(cards: List[CardInput],
     if not cards or len(cards) < 1:
         return []
 
-    # Resolve system date in issuer tz (first card's country used for "System Date" context only)
-    # Per spec: use country's tz; if multiple cards, we still compute each pair per its own country for holidays and weekends,
-    # but "system date" is taken per card's country when evaluating its schedule windows.
-    # To keep deterministic and simple, we interpret system_dt in UTC then convert to each card's tz individually.
-    base_dt = system_dt or datetime.now(timezone.utc)
+    # Eğer system_dt verilmemişse, bugünün tarihini yerel saatte alıyoruz.
+    # İlk kartın ülkesine göre zaman dilimini belirliyoruz.
+    country = _normalize_country(cards[0].country)
+    tz = _country_tz(country, device_tz)
+    
+    # Eğer `system_dt` parametresi verilmemişse, bugünün tarihini UTC olarak alıp
+    # yerel saat dilimine çeviriyoruz.
+    if system_dt is None:
+        base_dt = datetime.now(timezone.utc).astimezone(tz)
+    else:
+        base_dt = system_dt.astimezone(tz)
 
+    # Tatil bilgilerini okuyoruz
     holidays = _read_holidays(holidays_csv)
 
-    # Precompute current valid pairs *per card* relative to each card's own country tz date
+    # Kartları güncel tarihe göre işliyoruz
     per_card_pairs: Dict[str, CardComputed] = {}
     for c in cards:
         country = _normalize_country(c.country)
         tz = _country_tz(country, device_tz)
-        today_local = base_dt.astimezone(tz).date()
+        today_local = base_dt.date()  # Yerel tarih
         comp0 = _compute_closing_payment_for_month(today_local.year, today_local.month, c, holidays)
         comp = _advance_if_past(today_local, comp0, holidays)
         per_card_pairs[c.card_name] = comp
 
     pairs = list(per_card_pairs.values())
 
-    # Row selection logic
     rows: List[Dict] = []
 
     # 1st row selection
