@@ -374,12 +374,12 @@ def schedule_cards(cards: List[CardInput],
                 closing_for_use = after.closing
                 payment_for_use = after.payment
                 row = {
-                    "SIRA": row_number if idx == 0 else "",  # sadece ilkine sıra numarası yaz
+                    
                     "Kart Adı": p.card.card_name,
                     "Beklenen Kesim": "",  # ilk satırda boş bırakıyoruz
                     "Kullanım": f"{_fmt(begin, language)} – {_fmt(end, language)}",
-                    "Closing": _fmt(closing_for_use, language),
-                    "Payment": _fmt(payment_for_use, language),
+                    "Kesim": _fmt(closing_for_use, language),
+                    "Ödeme": _fmt(payment_for_use, language),
                 }
                 rows.append(row)
         else:
@@ -390,12 +390,12 @@ def schedule_cards(cards: List[CardInput],
                 payment_for_use = after.payment
                 row_number = number_override if number_override is not None else (len(rows) + 1)
                 row = {
-                    "SIRA": row_number,
+                    
                     "Kart Adı": ", ".join([p.card.card_name for p in group]),
                     "Beklenen Kesim": _fmt(prev_own_closing_before(group[0], begin), language),
                     "Kullanım": f"{_fmt(begin, language)} – {_fmt(end, language)}",
-                    "Closing": _fmt(closing_for_use, language),
-                    "Payment": _fmt(payment_for_use, language),
+                    "Kesim": _fmt(closing_for_use, language),
+                    "Ödeme": _fmt(payment_for_use, language),
                 }
                 rows.append(row)
 
