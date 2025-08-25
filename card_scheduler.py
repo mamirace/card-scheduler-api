@@ -212,7 +212,7 @@ def schedule_cards(cards: List[CardInput],
         y, m = start_exclusive.year, start_exclusive.month
         card = cpair.card
         comp = _compute_closing_payment_for_month(y, m, card)
-        while comp.closing >= start_exclusive:
+        while comp.closing > start_exclusive:
             if m == 1:
                 y, m = y - 1, 12
             else:
