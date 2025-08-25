@@ -248,7 +248,7 @@ def schedule_cards(cards: List[CardInput],
                 payment_for_use = after.payment
                 row = {
                     "Kart Adı": ", ".join([p.card.card_name for p in group]),
-                    "Beklenen Kesim": _fmt(prev_own_closing_before(group[0], begin), language),
+                    "Beklenen Kesim": _fmt(prev_own_closing_before(group[0], end + timedelta(days=1)), language),
                     "Kullanım": f"{_fmt(begin, language)} – {_fmt(end, language)}",
                     "Kesim": _fmt(closing_for_use, language),
                     "Ödeme": _fmt(payment_for_use, language),
