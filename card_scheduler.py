@@ -217,7 +217,7 @@ def schedule_cards(cards: List[CardInput],
         comp = _compute_closing_payment_for_month(y, m, card)
 
         # Eğer bu ayki kesim tarihi start_exclusive'den önceyse, onu döndür
-        if comp.closing < start_exclusive:
+        if comp.closing <= start_exclusive:
             return comp.closing
 
         # Değilse bir önceki aya git
