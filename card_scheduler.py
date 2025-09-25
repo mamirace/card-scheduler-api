@@ -229,18 +229,38 @@ def schedule_cards(cards: List[CardInput],
         number_override: Optional[int] = None,
     ):
         if is_first:
+            # Aynı satır verilerine sahip kartları grupla
+            temp_rows: Dict[Tuple, List[str]] = {}
+
             for p in picks:
                 after = next_own_closing_after(p, end + timedelta(days=1))
                 closing_for_use = after.closing
                 payment_for_use = after.payment
+                beklenen_kesim = prev_own_closing_before(p, begin)
+
+                key = (
+                    beklenen_kesim,
+                    begin,
+                    end,
+                    closing_for_use,
+                    payment_for_use,
+                )
+
+                if key not in temp_rows:
+                    temp_rows[key] = []
+                temp_rows[key].append(p.card.card_name)
+
+            for key, card_names in temp_rows.items():
+                beklenen_kesim, begin_dt, end_dt, closing_for_use, payment_for_use = key
                 row = {
-                    "Kart Adı": p.card.card_name,
-                    "Beklenen Kesim": _fmt(prev_own_closing_before(p, begin), language),
-                    "Kullanım": f"{_fmt(begin, language)} – {_fmt(end, language)}",
+                    "Kart Adı": ", ".join(card_names),
+                    "Beklenen Kesim": _fmt(beklenen_kesim, language),
+                    "Kullanım": f"{_fmt(begin_dt, language)} – {_fmt(end_dt, language)}",
                     "Kesim": _fmt(closing_for_use, language),
                     "Ödeme": _fmt(payment_for_use, language),
                 }
                 rows.append(row)
+
         else:
             groups = _group_by_use_date(picks)
             for group in groups:
