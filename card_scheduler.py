@@ -105,12 +105,25 @@ def _compute_closing_payment_for_month(y: int, m: int, card: CardInput) -> CardC
         payment = _next_business_day_on_or_after(payment_raw)
     elif card.payment_due_day is not None:
         payment_raw = _mk_date_from_day(y, m, card.payment_due_day)
-        closing = payment_raw - timedelta(days=grace)
-        payment = _next_business_day_on_or_after(payment_raw)
+        closing_candidate = payment_raw - timedelta(days=grace)
+        # Eğer closing_candidate bu ayın içinde değilse (ör: negatif ya da önceki aysa),
+        # kesimi bir önceki aya kaydır
+        if closing_candidate.month != m:
+            if m == 1:
+                prev_y, prev_m = y -1, 12
+            else:
+                prev_y, prev_m = y, m - 1
+            closing = _mk_date_from_day(prev_y, prev_m, card.statement_closing_day or 25)  # veya uygun default
+            payment_raw = closing + timedelta(days=grace)
+            payment = _next_business_day_on_or_after(payment_raw)
+        else:
+            closing = closing_candidate
+            payment = _next_business_day_on_or_after(payment_raw)
     else:
         raise ValueError(f"Card {card.card_name}: either closing day or payment day must be provided.")
 
     return CardComputed(card=card, closing=closing, payment=payment)
+
 
 def _advance_if_past(today: date, comp: CardComputed) -> CardComputed:
     y, m = comp.closing.year, comp.closing.month
