@@ -210,16 +210,19 @@ def schedule_cards(cards: List[CardInput],
         return comp
 
     def prev_own_closing_before(cpair: CardComputed, start_exclusive: date) -> Optional[date]:
-        y, m = cpair.closing.year, cpair.closing.month
         card = cpair.card
-        comp = _compute_closing_payment_for_month(y, m, card)
-        while comp.closing >= start_exclusive:
-            if m == 1:
-                y, m = y - 1, 12
-            else:
-                m -= 1
-            comp = _compute_closing_payment_for_month(y, m, card)
-        return comp.closing
+        y, m = start_exclusive.year, start_exclusive.month
+
+        # 1 ay geri git
+        if m == 1:
+            y -= 1
+            m = 12
+        else:
+            m -= 1
+
+        prev = _compute_closing_payment_for_month(y, m, card)
+        return prev.closing
+
 
     def add_row(
         picks: List[CardComputed],
