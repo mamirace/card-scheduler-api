@@ -248,7 +248,10 @@ def schedule_cards(cards: List[CardInput],
                 closing_for_use = after.closing
                 payment_for_use = after.payment
                 beklenen_kesim = prev_own_closing_before(p, begin)
-
+                if not beklenen_kesim or beklenen_kesim < today_local:
+                    # bir sonraki kesimi al
+                    beklenen_kesim = next_own_closing_after(p, begin).closing
+                
                 key = (
                     beklenen_kesim,
                     begin,
