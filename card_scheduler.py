@@ -104,7 +104,13 @@ def _compute_closing_payment_for_month(y: int, m: int, card: CardInput) -> CardC
         payment_raw = closing + timedelta(days=grace)
         payment = _next_business_day_on_or_after(payment_raw)
     elif card.payment_due_day is not None:
-        payment_raw = _mk_date_from_day(y, m, card.payment_due_day)
+        # Ödeme günü bir sonraki ay içindir
+        if m == 12:
+            y_next, m_next = y + 1, 1
+        else:
+            y_next, m_next = y, m + 1
+
+        payment_raw = _mk_date_from_day(y_next, m_next, card.payment_due_day)
         closing = payment_raw - timedelta(days=grace)
         payment = _next_business_day_on_or_after(payment_raw)
     else:
