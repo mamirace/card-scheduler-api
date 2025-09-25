@@ -150,6 +150,7 @@ def _group_by_use_date(pairs: List[CardComputed]) -> List[List[CardComputed]]:
     for p in pairs:
         added = False
         for group in grouped:
+            # Hem kesim tarihi hem de ödeme tarihi aynıysa gruplama yap
             if group[0].closing == p.closing and group[0].payment == p.payment:
                 group.append(p)
                 added = True
